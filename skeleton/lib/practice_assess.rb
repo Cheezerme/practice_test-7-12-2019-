@@ -1,6 +1,7 @@
 require 'byebug'
 class Array
 
+
   # Monkey patch the Array class and add a my_inject method. If my_inject receives
   # no argument, then use the first element of the array as the default accumulator.
   #inject is .each like thing that intializes acc as whatever value is passed my_inject(acc) , and alsi tajes a block
@@ -109,28 +110,35 @@ class Array
   # Write an Array#merge_sort method; it should not modify the original array.
 
   def merge_sort(&prc)
-    if self.size == 0 
-      return self
+    if self.size <= 1 
+      return self if self != nil
     end
-    prc ||= Proc.new{|ele1,ele2| ele1 <=> ele2}
-    left = self.take(self.length / 2)
-    right = self.drop(self.length / 2)
-    arr = Array.merge_sort(merge_sort(left),merge_sort(right),prc)
+    prc ||= Proc.new{|ele1, ele2| ele1 <=> ele2}
+    mid = self.length / 2
+    sorted_left = self.take(mid).merge_sort(&prc)
+    sorted_right = self.drop(mid).merge_sort(&prc)
+    arr = Array.merge(sorted_left,sorted_right,&prc)
   end
 
   private
-  def self.merge(left, right, &prc)
+  def self.merge(left,right, &prc)
     merged = []
-    until left.empty? || right.empty?
-      case prc.call(left[0],right[0])
-      when 1 
-        merged << left.shift
-      when 0 
-        merged << left.shift
-        merged < right.shift
-      when -1
-        merged << right.shift
+    #puts "#{left} #{right}"
+    #debugger
+    if left != nil && right != nil
+      until left.empty? || right.empty? 
+        case prc.call(left.first,right.first)
+        when -1 
+          merged << left.shift
+        when 0 
+          merged << left.shift
+        when 1
+          merged << right.shift
       end
+      end
+      merged += left if !left.empty?
+      merged += right if !right.empty?
     end
-  end
+    merged
+end
 end
